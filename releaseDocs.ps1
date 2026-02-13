@@ -39,7 +39,7 @@ Copy-Item "$SOURCE_DIR\_site\*" ".\$VersionFolder\" -Recurse -force
 write-host "Push the new docs to the remote branch"
 git config --local user.email "github-actions[bot]@users.noreply.sdl.com"
 git config --local user.name "github-actions[bot]"
-git add "".\$VersionFolder" -A
+git add ".\$VersionFolder" -A
 git commit -m "Update generated documentation"
 git push "$remote_repo" HEAD:gh-pages_temp
 Write-Output (${TOKEN}) | gh auth login --with-token
