@@ -43,36 +43,37 @@ Copy-Item "$SOURCE_DIR\_site\*" .\ -Recurse -force
 if ($betaSuffix -eq '-beta') {
     write-host "Injecting beta header into HTML files"
     $metadataPath = Join-Path $SOURCE_DIR "source-version-metadata.json"
-    $metadataSuffix = ""
+    $version = ""
+    $timestamp = ""
     if (Test-Path $metadataPath) {
         try {
             $metadata = Get-Content $metadataPath -Raw | ConvertFrom-Json
             $version = $metadata.ProductVersion
             if (-not $version) { $version = $metadata.AssemblyVersion }
             $timestamp = $metadata.Timestamp
-            if ($version -or $timestamp) {
-                $metadataSuffix = " (Version: $version; Date: $timestamp)"
-            }
         } catch {
             write-host "Unable to read source-version-metadata.json; continuing without metadata"
         }
     }
 
+    $betaCss = '<style>.navbar { top: 50px !important; } body { padding-top: 100px !important; }</style>'
+
     $betaHeaderHtml = @"
-<div style="background: #fff3cd; border-bottom: 2px solid #ffc107; padding: 12px 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <div class="container" style="text-align: center;">
-        <p style="margin: 0; color: #856404; font-weight: 500; font-size: 14px;">
-            <strong>⚠️ Beta / Prerelease Documentation</strong> - This documentation is subject to change and may not reflect the final product.$metadataSuffix
-        </p>
+    <div style="background: #fff3cd; border-bottom: 3px solid #ffc107; padding: 12px 15px; width: 100%; box-sizing: border-box; text-align: center; color: #856404; font-weight: 700; font-size: 14px; position: fixed; top: 0; left: 0; right: 0; z-index: 99999;">
+      ⚠️ Beta / Prerelease Documentation - Subject to change. (V: $version | $timestamp)
     </div>
-</div>
 "@
 
     Get-ChildItem -Recurse -Filter "*.html" | ForEach-Object {
-        $content = Get-Content $_.FullName -Raw
-        # Insert beta header after <body> tag
-        $newContent = $content -replace '(<body[^>]*>)', "`$1`n$betaHeaderHtml"
-        Set-Content -Path $_.FullName -Value $newContent -Encoding UTF8
+        $content = Get-Content $_.FullName -Raw -Encoding UTF8
+        
+        # Inject CSS into <head> to offset the navbar below the banner
+        $content = $content -replace '(</head>)', "$betaCss`n`$1"
+        
+        # Insert beta banner right after <body> tag
+        $content = $content -replace '(<body[^>]*>)', "`$1`n$betaHeaderHtml"
+        
+        Set-Content -Path $_.FullName -Value $content -Encoding UTF8
     }
 }
 
