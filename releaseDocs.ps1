@@ -39,6 +39,43 @@ write-host "Copy documentation into the repo"
 
 Copy-Item "$SOURCE_DIR\_site\*" .\ -Recurse -force
 
+# Inject beta header into all HTML files (only for beta branch)
+if ($betaSuffix -eq '-beta') {
+    write-host "Injecting beta header into HTML files"
+    $metadataPath = Join-Path $SOURCE_DIR "source-version-metadata.json"
+    $metadataSuffix = ""
+    if (Test-Path $metadataPath) {
+        try {
+            $metadata = Get-Content $metadataPath -Raw | ConvertFrom-Json
+            $version = $metadata.ProductVersion
+            if (-not $version) { $version = $metadata.AssemblyVersion }
+            $timestamp = $metadata.Timestamp
+            if ($version -or $timestamp) {
+                $metadataSuffix = " (Version: $version; Date: $timestamp)"
+            }
+        } catch {
+            write-host "Unable to read source-version-metadata.json; continuing without metadata"
+        }
+    }
+
+    $betaHeaderHtml = @"
+<div style="background: #fff3cd; border-bottom: 2px solid #ffc107; padding: 12px 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <div class="container" style="text-align: center;">
+        <p style="margin: 0; color: #856404; font-weight: 500; font-size: 14px;">
+            <strong>⚠️ Beta / Prerelease Documentation</strong> - This documentation is subject to change and may not reflect the final product.$metadataSuffix
+        </p>
+    </div>
+</div>
+"@
+
+    Get-ChildItem -Recurse -Filter "*.html" | ForEach-Object {
+        $content = Get-Content $_.FullName -Raw
+        # Insert beta header after <body> tag
+        $newContent = $content -replace '(<body[^>]*>)', "`$1`n$betaHeaderHtml"
+        Set-Content -Path $_.FullName -Value $newContent -Encoding UTF8
+    }
+}
+
 write-host "Push the new docs to the remote branch"
 git config --local user.email "github-actions[bot]@users.noreply.sdl.com"
 git config --local user.name "github-actions[bot]"
