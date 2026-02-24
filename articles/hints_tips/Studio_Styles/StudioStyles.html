@@ -23,7 +23,7 @@
 </head>
   <body data-spy="scroll" data-target="#affix" data-offset="120">
     <div style="background: #fff3cd; border-bottom: 3px solid #ffc107; padding: 12px 15px; width: 100%; box-sizing: border-box; text-align: center; color: #856404; font-weight: 700; font-size: 14px; position: fixed; top: 0; left: 0; right: 0; z-index: 99999;">
-      ⚠️ Beta / Prerelease Documentation - Subject to change. (V: 19.0.0.1401 | 2026-02-23 14:57:33)
+      ⚠️ Beta / Prerelease Documentation - Subject to change. (Api version 19.0.0.1401 | Published on 2026-02-23 14:57:33)
     </div>
     <div id="wrapper">
       <header>        
@@ -211,15 +211,41 @@
 </tr>
 </tbody>
 </table>
-<p>In this API were released following Studio <code>behaviours</code>:
-| Studio Behaviour        |  Description  |
-| ------------- | -----|
-| DragDrop | This behaviour easily allows you to get the dropped files or directories. First thing you need to do is to import the behaviours exposed by the API in your project, and attach it to a grid for example. You need to add your own <code>implementation</code> for DragDropCommand.|
-| WebBrowser Content Source | With this behaviour you can pass <code>HTML</code> code as source content to web browser.|
-| WebBrowser Bindable Source  | This behaviour allows you to easily set the navigation URI in your view model.
-| TextBlock AutoToolTip | Using this behaviour you can add a tooltip to a textblock.|
-| WindowLoaded | With behaviour you can attach to your window loaded event.|
-| TreeView SelectedItem Changed | With behaviour you can attachto SelectedItem Changed event of a treeview.|</p>
+<p>In this API were released following Studio <code>behaviours</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Studio Behaviour</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DragDrop</td>
+<td>This behaviour easily allows you to get the dropped files or directories. First thing you need to do is to import the behaviours exposed by the API in your project, and attach it to a grid for example. You need to add your own <code>implementation</code> for DragDropCommand.</td>
+</tr>
+<tr>
+<td>WebBrowser Content Source</td>
+<td>With this behaviour you can pass <code>HTML</code> code as source content to web browser.</td>
+</tr>
+<tr>
+<td>WebBrowser Bindable Source</td>
+<td>This behaviour allows you to easily set the navigation URI in your view model.</td>
+</tr>
+<tr>
+<td>TextBlock AutoToolTip</td>
+<td>Using this behaviour you can add a tooltip to a textblock.</td>
+</tr>
+<tr>
+<td>WindowLoaded</td>
+<td>With behaviour you can attach to your window loaded event.</td>
+</tr>
+<tr>
+<td>TreeView SelectedItem Changed</td>
+<td>With behaviour you can attachto SelectedItem Changed event of a treeview.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="how-to-use-studio-controls--in-your-plugin">How to use Studio Controls  in your plugin?</h2>
 <p>First of all you have to import <code>the api</code> in your application:</p>
 <pre><code class="lang-xml">&lt;xmlns:controls=&quot;clr-namespace:Sdl.Desktop.Platform.Controls.Controls;assembly=Sdl.Desktop.Platform.Controls&quot;/&gt;
