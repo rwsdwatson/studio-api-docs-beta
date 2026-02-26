@@ -158,7 +158,8 @@ jobs:
           $repoURL      = "https://RWS:$env:GH_TOKEN@github.com/" + $env:GITHUB_REPOSITORY + ".git"
           $featureBranch = '${{ inputs.targetBranch }}'
           $sourceBranch  = '${{ inputs.sourceBranch }}'
-          $metadataPath  = "${{ github.workspace }}\Bin\Mixed Platforms\Release\source-version-metadata.json"
+          $binPath = "${{ github.workspace }}..\..\Code\Bin\Mixed Platforms\Debug"
+          $metadataPath  = "$binPath\source-version-metadata.json"
           $prTitle       = "Update generated documentation"
 
           if (Test-Path $metadataPath) {
