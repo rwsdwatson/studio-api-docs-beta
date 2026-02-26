@@ -138,8 +138,7 @@ jobs:
         run: |
           dotnet tool update -g docfx
           $projectName  = $env:PROJECT_NAME
-          $docfxJsonPath = "docfx_project\$projectName\docfx.json"
-          docfx $docfxJsonPath
+          docfx docfx.json
 
       - name: Update the API documentation branch
         if: ${{ inputs.UpdateBranch == true }}
