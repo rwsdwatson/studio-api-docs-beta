@@ -98,7 +98,7 @@ jobs:
       - name: Extract version information from SDL.Versioning.dll
         shell: pwsh
         run: |
-          $binPath  = "${{ github.workspace }}\Bin\Mixed Platforms\Debug"
+          $binPath = "${{ github.workspace }}..\..\Code\Bin\Mixed Platforms\Debug"
           $dllPath  = Join-Path $binPath "sdl.versioning.dll"
 
           if (Test-Path $dllPath) {
