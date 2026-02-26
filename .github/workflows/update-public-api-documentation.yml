@@ -67,7 +67,7 @@ jobs:
           $binPath = "${{ github.workspace }}\Bin\Mixed Platforms\Release"
           New-Item -ItemType Directory -Force -Path $binPath | Out-Null
 
-          $orgUrl    = "https://dev.azure.com/RWS"
+          $orgUrl    = "https://dev.azure.com/sdl"
           $project   = "TradosStudio"
           $pipelineID = $env:PIPELINE_ID
           $branchName = "refs/heads/${{ inputs.projectBranch }}"
