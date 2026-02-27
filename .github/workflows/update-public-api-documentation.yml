@@ -4,11 +4,6 @@ name: Update Public API Documentation
 on:
   workflow_dispatch:
     inputs:
-      Beta:
-        description: 'Beta version'
-        required: true
-        default: false
-        type: boolean
       UpdateBranch:
         description: 'Update Branch'
         required: true
@@ -146,14 +141,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          $projectName = $env:PROJECT_NAME
-          $isBeta      = '${{ inputs.Beta }}'
-
-          $repoName = "studio-api-docs"
-
-          if ($isBeta -eq 'true') {
-            $repoName = $repoName + "-beta"
-          }
+          $projectName = $env:PROJECT_NAME         
+          $repoName = ($env:GITHUB_REPOSITORY -split "/")[-1]
 
           $repoURL      = "https://RWS:$env:GH_TOKEN@github.com/" + $env:GITHUB_REPOSITORY + ".git"
           $featureBranch = '${{ inputs.targetBranch }}'
