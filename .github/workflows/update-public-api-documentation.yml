@@ -26,7 +26,8 @@ on:
         type: string
 
 jobs:
-  push_docfx_api_to_github:
+  SynchApiDocsFromSource:
+
     runs-on: windows-latest
     env:
       PROJECT_NAME: TradosStudio
@@ -151,6 +152,7 @@ jobs:
           $metadataPath  = "$binPath\source-version-metadata.json"
           $prTitle       = "Update generated documentation"
 
+          write-host "getting version information from: $metadataPath"
           if (Test-Path $metadataPath) {
             try {
               $metadata = Get-Content -Path $metadataPath -Raw | ConvertFrom-Json
@@ -166,6 +168,8 @@ jobs:
             Write-Warning "Version metadata file not found at: $metadataPath"
           }
 
+          write-host "cloning repo from: $repoURL to $pwd"
+
           git clone $repoURL
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.sdl.com"
@@ -173,6 +177,7 @@ jobs:
           Set-Location $repoName
           git checkout $sourceBranch
 
+          write-host "make feature branch featureBranch"
           $git_response = git ls-remote --heads "$repoURL" "$featureBranch"
 
           if ($null -eq $git_response) {
@@ -181,13 +186,19 @@ jobs:
             git checkout -b "temp_$featureBranch"
           }
 
+          $src=[System.IO.Path]::GetFullPath(".\api\")
+          $tgt=[System.IO.Path]::GetFullPath(".\")
+          
+          write-host "copying generated from $src documentation to $tgt"
           git rm -r .\api\*
           Copy-Item -Path ".\api\" -Destination .\ -Force -Recurse
 
+          write-host "copying version metadata from $metadataPath to $tgt"
           if (Test-Path $metadataPath) {
             Copy-Item -Path $metadataPath -Destination .\source-version-metadata.json -Force
           }
 
+          write-host "committing and pushing changes to $featureBranch"
           git add .\api\*.*
           if (Test-Path .\source-version-metadata.json) {
             git add .\source-version-metadata.json
