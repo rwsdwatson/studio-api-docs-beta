@@ -193,7 +193,7 @@ jobs:
           }
 
           git rm -r .\api\*
-          Copy-Item -Path "..\docfx_project\$projectName\api\" -Destination .\ -Force -Recurse
+          Copy-Item -Path ".\api\" -Destination .\ -Force -Recurse
 
           if (Test-Path $metadataPath) {
             Copy-Item -Path $metadataPath -Destination .\source-version-metadata.json -Force
