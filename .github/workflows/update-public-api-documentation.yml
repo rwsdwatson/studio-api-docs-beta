@@ -27,7 +27,7 @@ on:
 
 jobs:
   SynchApiDocsFromSource:
-
+    name: "Update api docs from product binaries"
     runs-on: windows-latest
     env:
       PROJECT_NAME: TradosStudio
@@ -41,7 +41,7 @@ jobs:
         env:
           AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
         run: |
-          $binPath = "${{ github.workspace }}..\..\Code\Bin\Mixed Platforms\Debug"
+          $binPath = [System.IO.Path]::GetFullPath("${{ github.workspace }}..\..\Code\Bin\Mixed Platforms\Debug")
           New-Item -ItemType Directory -Force -Path $binPath | Out-Null
 
           $orgUrl    = "https://dev.azure.com/sdl"
@@ -49,6 +49,8 @@ jobs:
           $pipelineID = $env:PIPELINE_ID
           $branchName = "refs/heads/${{ inputs.projectBranch }}"
           $artifactName = "binaries"
+
+          write-host "Fetching latest build artifacts for pipeline ID $env:PIPELINE_ID on branch $branchName to populate $binPath"
 
           $headers = @{
             Authorization = "Basic " + [Convert]::ToBase64String(
@@ -79,11 +81,11 @@ jobs:
           $downloadUrl = $artifact.resource.downloadUrl
           Write-Host "Downloading artifact from: $downloadUrl"
 
-          $zipPath = "${{ github.workspace }}\binaries.zip"
+          $zipPath = "${{ RUNNER.TEMP }}\binaries.zip"
           Invoke-WebRequest -Uri $downloadUrl -Headers $headers -OutFile $zipPath
 
           # Extract and copy to target bin path
-          $extractDir = "${{ github.workspace }}\binaries_extracted"
+          $extractDir = "${{ RUNNER.TEMP }}\binaries_extracted"
           Expand-Archive -Path $zipPath -DestinationPath $extractDir -Force
           # ADO container artifacts unzip into a subfolder named after the artifact
           $innerDir = Join-Path $extractDir $artifactName
@@ -198,12 +200,13 @@ jobs:
             Copy-Item -Path $metadataPath -Destination .\source-version-metadata.json -Force
           }
 
-          write-host "committing and pushing changes to $featureBranch"
+          write-host "staging changes for commit"
           git add .\api\*.*
           if (Test-Path .\source-version-metadata.json) {
             git add .\source-version-metadata.json
           }
 
+          write-host "committing and pushing changes to $featureBranch"
           git commit -a -m "update api doc"
           git push $repoURL
 

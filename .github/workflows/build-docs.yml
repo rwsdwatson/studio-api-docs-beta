@@ -1,0 +1,39 @@
+name: Build Docs
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      ProductName: 'Trados Studio'
+      ProductNameWithEdition: 'Trados Studio 2026 Release'
+      ProductVersion: Studio19
+      VersionNumber: 19
+      VisualStudioEdition: 'Microsoft Visual Studio 2022'
+      PluginPackedPath : '%AppData%\Trados\Trados Studio\19\Plugins\Packages\'
+      PluginUnpackedPath: '%AppData%\Trados\Trados Studio\19\Plugins\Unpacked\'
+      InstallationFolder: 'C:\Program Files (x86)\Trados\Trados Studio\Studio19'
+      DefaultProjectsFolder: 'C:\Users\UserName\Documents\Studio 2026 Release\Projects'
+      StudioDocumentsFolderName: 'Studio 2026 Release'
+      AppSigningEmail : app-signing@sdl.com
+      ServerProductName: Trados GroupShare 
+      ServerProductNameWithVersion: Trados GroupShare 2020 SR1
+      DotNetVersion: '.Net Framework 4.8'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install docfx
+        run: |
+          dotnet tool install -g docfx
+
+      - name: build _site
+        run: docfx.exe build docfx.json
+
+      - shell: pwsh
+        run: |
+          .\releaseDocs.ps1 "$GITHUB_ACTOR" "${{ secrets.GITHUB_TOKEN }}"
+        if: github.event_name != 'pull_request'
