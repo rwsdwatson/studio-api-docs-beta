@@ -3,3 +3,5 @@
 <script type="text/javascript" src="{{_rel}}styles/docfx.vendor.min.js"></script>
 <script type="text/javascript" src="{{_rel}}styles/docfx.js"></script>
 <script type="text/javascript" src="{{_rel}}styles/main.js"></script>
+<script type="text/javascript" src="{{_rel}}styles/beta-config.js"></script>
+<script type="text/javascript" src="{{_rel}}styles/beta-banner.js"></script>

@@ -41,47 +41,47 @@ foreach ($item in $items){
   git rm $item -r
  }
 }
+write-host "Stripping previously embedded beta headers from kept HTML files"
+Get-ChildItem -Recurse -Filter "*.html" | ForEach-Object {
+    $content = Get-Content $_.FullName -Raw -Encoding UTF8
+    if ($content -notmatch 'Beta / Prerelease Documentation') { return }
+
+    # Remove the injected <style> block
+    $content = $content -replace '\s*<style>\.navbar \{ top: 50px !important; \} body \{ padding-top: 100px !important; \}<\/style>', ''
+
+    # Remove the injected beta banner <div> (single line, inserted after <body>)
+    $content = $content -replace '\r?\n\s*<div[^>]+background:\s*#fff3cd[^>]*>[\s\S]*?<\/div>', ''
+
+    Set-Content -Path $_.FullName -Value $content -Encoding UTF8
+}
+
 write-host "Copy documentation into the repo"
 
 Copy-Item "$SOURCE_DIR\_site\*" .\ -Recurse -force
 
-# Inject beta header into all HTML files (only for beta branch)
-if ($betaSuffix -eq '-beta') {
-    write-host "Injecting beta header into HTML files"
-    $metadataPath = Join-Path $SOURCE_DIR "source-version-metadata.json"
-    $version = ""
-    $timestamp = ""
-    if (Test-Path $metadataPath) {
-        try {
-            $metadata = Get-Content $metadataPath -Raw | ConvertFrom-Json
-            $version = $metadata.ProductVersion
-            if (-not $version) { $version = $metadata.AssemblyVersion }
-            $timestamp = $metadata.Timestamp
-        } catch {
-            write-host "Unable to read source-version-metadata.json; continuing without metadata"
-        }
-    }
-
-    $betaCss = '<style>.navbar { top: 50px !important; } body { padding-top: 100px !important; }</style>'
-
-    $betaHeaderHtml = @"
-    <div style="background: #fff3cd; border-bottom: 3px solid #ffc107; padding: 12px 15px; width: 100%; box-sizing: border-box; text-align: center; color: #856404; font-weight: 700; font-size: 14px; position: fixed; top: 0; left: 0; right: 0; z-index: 99999;">
-      ⚠️ Beta / Prerelease Documentation - Subject to change. (Api version $version | Published on $timestamp)
-    </div>
-"@
-
-    Get-ChildItem -Recurse -Filter "*.html" | ForEach-Object {
-        $content = Get-Content $_.FullName -Raw -Encoding UTF8
-        
-        # Inject CSS into <head> to offset the navbar below the banner
-        $content = $content -replace '(</head>)', "$betaCss`n`$1"
-        
-        # Insert beta banner right after <body> tag
-        $content = $content -replace '(<body[^>]*>)', "`$1`n$betaHeaderHtml"
-        
-        Set-Content -Path $_.FullName -Value $content -Encoding UTF8
+# Generate beta-config.js so beta-banner.js knows whether to show the banner
+$metadataPath = Join-Path $SOURCE_DIR "source-version-metadata.json"
+$version = ""
+$timestamp = ""
+if (Test-Path $metadataPath) {
+    try {
+        $metadata = Get-Content $metadataPath -Raw | ConvertFrom-Json
+        $version = $metadata.ProductVersion
+        if (-not $version) { $version = $metadata.AssemblyVersion }
+        $timestamp = $metadata.Timestamp
+    } catch {
+        write-host "Unable to read source-version-metadata.json; continuing without metadata"
     }
 }
+
+$betaConfigPath = ".\styles\beta-config.js"
+if ($betaSuffix -eq '-beta') {
+    write-host "Writing beta-config.js (isBeta=true, version=$version)"
+    $betaConfigContent = "window.betaConfig = { isBeta: true, version: `"$version`", timestamp: `"$timestamp`" };"
+} else {
+    $betaConfigContent = "window.betaConfig = { isBeta: false };"
+}
+Set-Content -Path $betaConfigPath -Value $betaConfigContent -Encoding UTF8
 
 write-host "Push the new docs to the remote branch"
 git config --local user.email "github-actions[bot]@users.noreply.sdl.com"
