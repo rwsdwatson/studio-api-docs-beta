@@ -9,11 +9,17 @@ write-host  "`ACTOR is $ACTOR"
 $SOURCE_DIR=$psscriptroot
 $TEMP_REPO_DIR=[System.IO.Path]::GetFullPath("$psscriptroot/../docs-gh-pages")
 
-# Determine if current repo ends with -beta
-$currentRepoName = Split-Path -Leaf $SOURCE_DIR
-$betaSuffix = if ($currentRepoName -match '-beta$') { '-beta' } else { '' }
+# Determine current repo from the GitHub environment variable, with fallback to directory name
+$GITHUB_REPO = $env:GITHUB_REPOSITORY
+if ($GITHUB_REPO) {
+    $betaSuffix = if ($GITHUB_REPO -match '-beta$') { '-beta' } else { '' }
+} else {
+    $currentRepoName = Split-Path -Leaf $SOURCE_DIR
+    $betaSuffix = if ($currentRepoName -match '-beta$') { '-beta' } else { '' }
+    $GITHUB_REPO = "rws/studio-api-docs${betaSuffix}"
+}
 
-$remote_repo="https://github-actions:${TOKEN}@github.com/rws/studio-api-docs${betaSuffix}.git"
+$remote_repo = "https://github-actions:${TOKEN}@github.com/${GITHUB_REPO}.git"
 
 write-host "Cloning the repo $remote_repo with the gh-pages branch"
 git clone $remote_repo --branch gh-pages $TEMP_REPO_DIR
